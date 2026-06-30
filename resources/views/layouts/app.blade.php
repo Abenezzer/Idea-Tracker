@@ -4,10 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>{{ $title ?? config('app.name') }}</title>
-
-    ...
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600&display=swap" rel="stylesheet" />
 
@@ -20,8 +17,6 @@
 
 <body>
     {{ $slot }}
-    <h1>Hello World</h1>
-
     @livewireScripts
     @fluxScripts
 </body>
