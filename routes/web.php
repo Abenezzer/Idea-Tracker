@@ -2,6 +2,4 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function() {
-    return "hello world";
-});
+Route::livewire('/', 'pages::ideas-index');
