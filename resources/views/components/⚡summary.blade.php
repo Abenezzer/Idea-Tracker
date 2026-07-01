@@ -15,7 +15,7 @@ new class extends Component {
     #[Computed]
     public function summary()
     {
-        sleep(5);
+        
         return [
             'all' => $this->user->ideas()->count(),
             'pending' => $this->user->ideas()->where('status', 'pending')->count(),

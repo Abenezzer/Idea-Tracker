@@ -16,6 +16,7 @@
 </head>
 
 <body>
+   
     {{ $slot }}
     @livewireScripts
     @fluxScripts
