@@ -6,6 +6,7 @@ use Livewire\Attributes\Computed;
 use Livewire\WithPagination;
 use App\Models\User;
 use App\IdeaStatus;
+use Illuminate\Support\Facades\Storage;
 
 new class extends Component {
     use WithPagination;
@@ -127,7 +128,10 @@ new class extends Component {
                 <flux:card class="p-0 overflow-hidden group cursor-pointer transition hover:shadow-md">
                     <div
                         class="aspect-video w-full bg-zinc-100 dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-800">
-                        @if (!$idea->image_path)
+                        @if ($idea->image_path)
+                            <img src="{{ Storage::url($idea->image_path) }}"
+                                alt="Placeholder" class="h-full w-full object-cover">
+                        @else
                             <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=500"
                                 alt="Placeholder" class="h-full w-full object-cover">
                         @endif

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(Idea::class)->constrained()->cascadeOnDelete();
             $table->string('description');
+            $table->boolean('complated')->default(false);
             $table->timestamps();
         });
     }

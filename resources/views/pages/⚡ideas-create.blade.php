@@ -1,8 +1,18 @@
 <?php
 
 use Livewire\Component;
+use Livewire\WithFileUploads;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Idea;
+use App\Models\Step;
+use App\Models\User;
 
 new class extends Component {
+
+    use WithFileUploads;
+
+    public ?User $user;
+
     public $title = '';
     public $description = '';
     public $status = 'pending';
@@ -12,14 +22,30 @@ new class extends Component {
     public $resources = [];
     public $resource = '';
 
+    public function mount() {
+        $this->user = Auth::user();
+    }
+
     public function create()
     {
         $this->validate();
-        dd($this->all());
+        if($this->image_path) {
+           $this->image_path =  $this->image_path->store('feature_imgs', 'public');
+        }
+        $idea  = $this->user->ideas()->create($this->only(['title', 'description', 'status', 'resources', 'image_path']));
+        // if there is steps
+        if(count($this->steps)) {
+            foreach($this->steps as $step) {
+                $idea->steps()->create(['description' => $step]);
+            }
+
+        }
+        $this->redirect('/', 'navigate:true');
     }
 
     public function addStep()
     {
+        $this->validateOnly('step');
         if (trim($this->step)) {
             $this->steps[] = $this->step;
             $this->reset('step');
@@ -27,10 +53,22 @@ new class extends Component {
     }
 
     public function deleteStep($value) {
-        $this->steps = collect($this->steps)->reject(fn($item) => $item === $value)->values()->all();
-        dd($this->steps);
-        
+       $this->steps = collect($this->steps)->diff([$value])->values()->all();
+      
+    }
 
+    public function addResource()
+    {
+        $this->validateOnly('resource');
+        if (trim($this->resource)) {
+            $this->resources[] = $this->resource;
+            $this->reset('resource');
+        }
+    }
+
+    public function deleteResource($value) {
+       $this->resources = collect($this->resources)->diff([$value])->values()->all();
+      
     }
 
     public function rules()
@@ -39,9 +77,11 @@ new class extends Component {
             'title' => ['required', 'min:3', 'max:250'],
             'description' => ['required', 'min:3', 'max:1000'],
             'status' => ['required', 'in:pending,in_progress,completed'],
-            'image_path' => ['nullable', 'image', 'max:10'],
+            'image_path' => ['nullable', 'image', 'max:1000000'],
+            'step' => ['min:3', 'max:250', 'string'],
             'steps' => ['nullable', 'array'],
             'steps.*' => ['string', 'min:3', 'max:5120'],
+            'resource' => ['url', 'max:250'],
             'resources' => ['nullable', 'array'],
             'resources.*' => ['url'],
         ];
@@ -52,7 +92,7 @@ new class extends Component {
 <div>
     <div class="p-6 max-w-3xl mx-auto space-y-8">
 
-        <!-- HEADER BAR -->
+   
         <div class="flex items-center justify-between border-b border-zinc-200 pb-4 dark:border-zinc-800">
             <div>
                 <flux:heading size="xl">Light Up a New Idea</flux:heading>
@@ -114,7 +154,7 @@ new class extends Component {
                                 <div class="flex-1">
                                     <p>{{ $step }}</p>
                                 </div>
-                                <flux:button wire:click="deleteStep({{ $step }})" icon="trash" variant="ghost" color="red" size="sm" inset />
+                                <flux:button wire:click="deleteStep('{{ $step }}')" icon="trash" variant="ghost" color="red" size="sm" inset />
                             </div>
                         @endforeach
 
@@ -134,24 +174,39 @@ new class extends Component {
                         <p class="text-xs text-zinc-500 dark:text-zinc-400">Link inspiring links, technical docs,
                             repositories, or assets.</p>
                     </div>
-                    <flux:button variant="ghost" icon="plus" size="sm">Add Resource</flux:button>
+                   
                 </div>
 
-                <!-- Resources Static Placeholder Rows Grid -->
-                <div
-                    class="space-y-3 bg-zinc-50/50 p-4 rounded-xl border border-zinc-200 dark:bg-zinc-900/40 dark:border-zinc-800">
-                    div
-                    <div class="">
-                        <flux:input placeholder="URL Link (e.g., https://github.com/...)" size="sm"
-                            icon="link" />
-                    </div>
+               <div class="flex justify-around gap-2 items-center">
+                    <flux:input wire:model="resource" placeholder="Add Resource"></flux:input>
+                    <flux:button wire:click="addResource" variant="ghost" icon="plus" size="sm">Add Resource
+                    </flux:button>
                 </div>
+
+                <!-- Steps Static Placeholder Items List -->
+                @if (count($resources))
+                    <div
+                        class="space-y-3 bg-zinc-50/50 p-4 rounded-xl border border-zinc-200 dark:bg-zinc-900/40 dark:border-zinc-800">
+                        <!-- Example Row 1 -->
+                        @foreach ($resources as $resource)
+                            <div class="flex items-center gap-3">
+                                <div class="text-xs font-semibold text-zinc-400 w-5">{{ $loop->iteration }}</div>
+                                <div class="flex-1">
+                                    <p>{{ $resource }}</p>
+                                </div>
+                                <flux:button wire:click="deleteResource('{{ $resource }}')" icon="trash" variant="ghost" color="red" size="sm" inset />
+                            </div>
+                        @endforeach
+
+                    </div>
+
+                @endif
             </div>
 
             <!-- FORM SUBMISSION ACTIONS -->
             <div class="flex items-center justify-end space-x-3 pt-6 border-t border-zinc-200 dark:border-zinc-800">
 
-                <flux:button variant="primary" color="green" type="submit">Create Idea</flux:button>
+                <flux:button wire:click="create" variant="primary" color="green" type="submit">Create Idea</flux:button>
             </div>
 
         </form>

@@ -14,4 +14,8 @@ class Step extends Model
     public function idea(): BelongsTo {
         return $this->belongsTo(Idea::class);
     }
+
+    protected $casts = [
+        'complate' => 'boolean'
+    ];
 }

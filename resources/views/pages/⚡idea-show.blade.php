@@ -2,6 +2,7 @@
 
 use Livewire\Component;
 use App\Models\Idea;
+use Illuminate\Support\Facades\Storage;
 
 new class extends Component {
     public Idea $idea;
@@ -36,7 +37,10 @@ new class extends Component {
         <flux:card class="p-0 overflow-hidden space-y-6">
             <!-- Hero Preview Image -->
             <div class="aspect-21/9 w-full bg-zinc-100 dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-800">
-                @if (!$idea->image_path)
+                @if ($idea->image_path)
+                 <img src="{{ Storage::url($idea->image_path) }}" alt="Idea Banner"
+                        class="h-full w-full object-cover">
+                @else
                     <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1200" alt="Idea Banner"
                         class="h-full w-full object-cover">
                 @endif
