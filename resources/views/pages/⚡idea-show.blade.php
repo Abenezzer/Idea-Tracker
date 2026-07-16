@@ -3,9 +3,32 @@
 use Livewire\Component;
 use App\Models\Idea;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Attributes\Validate;
+use App\Models\Step;
 
 new class extends Component {
     public Idea $idea;
+    #[Validate('required|string|min:3')]
+    public $newStep;
+
+    public function updateStep($id) {
+        $step = Step::findOrFail($id);
+        $step->update(['complated' => !$step->complated]);
+
+    }
+
+    public function deleteStep($id) {
+         $step = Step::findOrFail($id);
+         $step->delete();
+
+    }
+
+    public function addStep() {
+        
+        $this->validate();
+        $this->idea->steps()->create(['description' => $this->newStep]);
+       
+    }
 };
 ?>
 
@@ -38,7 +61,7 @@ new class extends Component {
             <!-- Hero Preview Image -->
             <div class="aspect-21/9 w-full bg-zinc-100 dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-800">
                 @if ($idea->image_path)
-                 <img src="{{ Storage::url($idea->image_path) }}" alt="Idea Banner"
+                    <img src="{{ Storage::url($idea->image_path) }}" alt="Idea Banner"
                         class="h-full w-full object-cover">
                 @else
                     <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1200" alt="Idea Banner"
@@ -63,7 +86,12 @@ new class extends Component {
         <div class="space-y-4">
             <div class="flex items-center justify-between">
                 <flux:heading size="lg">Project Steps & Roadmap</flux:heading>
-                <flux:button variant="filled" size="sm" icon="plus">Add Step</flux:button>
+                <div class="flex items-center justify-center gap-2">
+                    <flux:input wire:model="newStep"></flux:input>
+                     <flux:button wire:click="addStep" variant="filled" size="sm" icon="plus">Add Step</flux:button>
+    
+                </div>
+               
             </div>
 
             <!-- Steps Stack Container -->
@@ -72,23 +100,24 @@ new class extends Component {
 
                     @foreach ($idea->steps as $step)
                         <div
-                            class="flex items-start p-4 bg-white rounded-xl border border-zinc-200 dark:bg-zinc-900 dark:border-zinc-800 gap-4">
-                            <div
-                                class="mt-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/40">
-                                <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">✓</span>
-                            </div>
-                            <div class="flex-1 space-y-1">
-                                <h4 class="font-medium text-sm text-zinc-500 line-through dark:text-zinc-400">Initial
-                                    Market Research & Wireframing</h4>
+                            class="flex justify-between p-4 bg-white rounded-xl border border-zinc-200 dark:bg-zinc-900 dark:border-zinc-800 gap-4">
 
+                            <div class="flex gap-2">
+                                <h1></h1>
+                                <flux:checkbox wire:click="updateStep({{ $step->id }})" :checked="$step->complated"></flux:checkbox>
+                                <h4
+                                    class="font-medium text-sm {{ $step->complated ? 'text-zinc-500 line-through dark:text-zinc-400' : '' }}">
+                                    {{ $step->description }}
+                                </h4>
                             </div>
-                            <flux:button variant="ghost" icon="ellipsis-horizontal" size="sm" inset />
+                            <flux:button wire:click="deleteStep({{ $step->id }})" wire:confirm="Are you sure you want to delte this step?" variant="ghost" icon="trash" size="sm" inset />
                         </div>
                     @endforeach
 
                 @endif
 
             </div>
+           
         </div>
     </div>
 </div>

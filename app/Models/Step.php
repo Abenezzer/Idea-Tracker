@@ -16,6 +16,6 @@ class Step extends Model
     }
 
     protected $casts = [
-        'complate' => 'boolean'
+        'complated' => 'boolean'
     ];
 }
