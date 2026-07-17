@@ -29,6 +29,10 @@ new class extends Component {
         $this->idea->steps()->create(['description' => $this->newStep]);
        
     }
+    public function deleteIdea() {
+        $this->idea->delete();
+        $this->redirect('/', 'navigate:true');
+    }
 };
 ?>
 
@@ -49,10 +53,10 @@ new class extends Component {
 
         <!-- 1. HEADER CONTROL LAYER -->
         <div class="flex items-center justify-between">
-            <flux:button icon="chevron-left" variant="ghost" size="sm">Back to Ideas</flux:button>
+            <flux:button href="/" wire:navigate icon="chevron-left" variant="ghost" size="sm">Back to Ideas</flux:button>
             <div class="flex items-center space-x-2">
-                <flux:button variant="ghost" icon="pencil-square" size="sm">Edit Idea</flux:button>
-                <flux:button variant="ghost" icon="trash" color="red" size="sm">Delete</flux:button>
+                <flux:button href="/ideas/{{ $idea->id }}/edit" wire:navigate variant="ghost" icon="pencil-square" size="sm">Edit Idea</flux:button>
+                <flux:button wire:click="deleteIdea" wire:confirm="Are you sure you want to delete this idea?" variant="ghost" icon="trash" color="red" size="sm">Delete</flux:button>
             </div>
         </div>
 
