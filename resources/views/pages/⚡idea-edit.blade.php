@@ -21,9 +21,10 @@ new class extends Component {
     public $step = '';
     public $resources = [];
     public $resource = '';
+    public $preview_image = null;
 
     public function mount(Idea $idea) {
-        // $this->user = Auth::user();
+        
         $this->idea = $idea;
         $this->title = $idea->title;
         $this->description = $idea->description;
@@ -31,6 +32,18 @@ new class extends Component {
         $this->image_path = null;
         $this->steps = $idea->steps;
         $this->resources = $idea->resources;
+
+        if($idea->image_path) {
+             $this->preview_image = Storage::url($idea->image_path);
+        }
+    }
+
+    public function updatedImagePath() {
+        if($this->image_path instanceof TemporaryUploadedFile) {
+            $this->preview_image = $this->image_path->temporaryUrl();
+        } else {
+            $this->preview_image = Storage::url($this->image_path);
+        }
     }
 
     public function update()
@@ -131,12 +144,14 @@ new class extends Component {
             <!-- 4. IMAGE UPLOAD -->
             <flux:input wire:model.live="image_path" type="file" label="Preview Image Media"
                 description="Upload an inspiring thumbnail or design mockup (PNG, JPG)." />
-            @if ($idea->image_path instanceof TemporaryUploadedFile)
-                <img src="{{ $image_path->temporaryUrl() }}" alt="" width="250px">
-            @elseif ($idea->image_path) 
-                <img src="{{ Storage::url($idea->image_path) }}" alt="" width="250px">
+           
+              @if ($preview_image)
+                  <img src="{{ $preview_image }}" alt="" width="250px">
+              @endif
             
-            @endif
+              
+            
+            
 
             <flux:separator class="my-8" />
 
